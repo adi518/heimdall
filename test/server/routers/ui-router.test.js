@@ -17,15 +17,15 @@ const urlHeimdall = 'https://heimdall-staging.cloud-elements.com/v1/api'
 const urlCloudElements = 'https://staging.cloud-elements.com/elements/api-v2'
 const chromeHeadless = false
 
-const initiateTest = async elementToken => {
+const initiateTest = async heimdallToken => {
     const browser = await puppeteer.launch({
-        //Puppeteer is only guaranteed to work with the version of chromium it is bundled with. Use executablePath at your own risk
+        // Use executablePath at your own risk, Puppeteer is only guaranteed to work with the version of chromium it is bundled with. 
         executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
         headless: chromeHeadless
     })
 
     const firstPage = await browser.newPage()
-    await firstPage.goto(`file:${path.join(__dirname, 'index.html')}?token=${elementToken}`)
+    await firstPage.goto(`file:${path.join(__dirname, 'index.html')}?token=${heimdallToken}`)
     const payloadChanged = firstPage.waitForFunction(() => document.getElementById('payload').innerText.length > 0, { polling: 5 * 1000, timeout: 60 * 1000 })
     await firstPage.waitForSelector('#connect')
 
@@ -56,17 +56,17 @@ beforeAll(async () => {
 })
 
 describe.only('BigCommerce Basic Auth', () => {
-    let elementId, elementToken, instanceId
+    let elementId, heimdallToken, instanceId
 
     beforeAll(async () => {
         const element = await post(`${urlHeimdall}/elements`, BIG_COMMERCE, authHeader)
         const response = await get(`${urlHeimdall}/url`, { elementKey: element.key, uniqueName: element.name }, authHeader)
         elementId = element.id
-        elementToken = response.token
+        heimdallToken = response.token
     })
 
     it('Test Basic Authentication and validate element token', async () => {
-        let { browser, startPage, elementPage, payloadChanged } = await initiateTest(elementToken)
+        let { browser, startPage, elementPage, payloadChanged } = await initiateTest(heimdallToken)
         try {
             await elementPage.waitForSelector('#password')
             await elementPage.focus('input[id=password]')
@@ -100,17 +100,17 @@ describe.only('BigCommerce Basic Auth', () => {
 })
 
 describe('Desk.com Oauth 1', () => {
-    let elementId, elementToken, instanceId
+    let elementId, heimdallToken, instanceId
 
     beforeAll(async () => {
         const element = await post(`${urlHeimdall}/elements`, DESK, authHeader)
         const response = await get(`${urlHeimdall}/url`, { elementKey: element.key, uniqueName: element.name }, authHeader)
         elementId = element.id
-        elementToken = response.token
+        heimdallToken = response.token
     })
 
     it('Test Oauth 1 and validate element token', async () => {
-        let { browser, startPage, elementPage, payloadChanged } = await initiateTest(elementToken)
+        let { browser, startPage, elementPage, payloadChanged } = await initiateTest(heimdallToken)
         try {
             await elementPage.waitForSelector('#subdomain')
             await elementPage.focus('input[id=subdomain]')
@@ -148,17 +148,17 @@ describe('Desk.com Oauth 1', () => {
 })
 
 describe('Box Oauth 2', () => {
-    let elementId, elementToken, instanceId
+    let elementId, heimdallToken, instanceId
 
     beforeAll(async () => {
         const element = await post(`${urlHeimdall}/elements`, BOX, authHeader)
         const response = await get(`${urlHeimdall}/url`, { elementKey: element.key, uniqueName: element.name }, authHeader)
         elementId = element.id
-        elementToken = response.token
+        heimdallToken = response.token
     })
 
     it('Test Oauth 2 and validate element token', async () => {
-        let { browser, startPage, elementPage, payloadChanged } = await initiateTest(elementToken)
+        let { browser, startPage, elementPage, payloadChanged } = await initiateTest(heimdallToken)
         try {
             await elementPage.waitForSelector('#login')
             await elementPage.focus('input[id=login]')
@@ -183,7 +183,7 @@ describe('Box Oauth 2', () => {
     })
 
     afterAll(async () => {
-        await teardownTestData(elementId, elementId)
+        await teardownTestData(elementId, instanceId)
     })
 })
 
